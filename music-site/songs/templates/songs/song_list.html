@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Song List</title>
+</head>
+<body>
+  {% if user.is_authenticated and user.is_staff %}
+  <h2>Upload Song</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="song_file" required>
+    <button type="submit">Upload</button>
+  </form>
+  {% endif %}
+
+<h2>BULLE NAKA SONG</h2>
+  {% for song in songs %}
+    <div>
+      <strong>{{ song.title }}</strong> |
+      {{ song.duration }} |
+      {{ song.size }} |
+      {{ song.uploaded_at|date:"Y-m-d H:i" }} |
+      {{ song.download_count }}
+      <a href="{% url 'download_song' song.id %}">Download</a>  |
+      
+      <button onclick="copyLink('{{ song.full_url }}')">Copy Link</button>
+
+      {% if user.is_authenticated and user.is_staff %}
+        <form method="post" action="{% url 'delete_song' song.id %}" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit">Delete</button>
+        </form>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p>No songs available.</p>
+  {% endfor %}
+
+  <script>
+    function copyLink(link) {
+      navigator.clipboard.writeText(link)
+        .then(() => alert('Link copied!'))
+        .catch(() => alert('Failed to copy link.'));
+    }
+  </script>
+  </body>
+</html>
